@@ -13,6 +13,7 @@ def draw_field(field: list) -> None:
 
 
 def check_field(field: list) -> tuple:
+    print(1)
     for i in range(1, 6, 2):
         elm = [field[i][1], field[i][2], field[i][3]]
 
@@ -25,7 +26,8 @@ def check_field(field: list) -> tuple:
         if len(set(elm)) == 1 and elm[0] != "#":
             return True, elm[0]
 
-    diagonals = [[field[1][1], field[3][2], field[5][3]], [field[1][3], field[3][2], field[5][1]]]
+    diagonals = [[field[1][1], field[3][2], field[5][3]],
+                 [field[1][3], field[3][2], field[5][1]]]
 
     for _, elm in enumerate(diagonals):
         if len(set(elm)) == 1 and elm[0] != "#":
@@ -69,44 +71,29 @@ def main() -> bool:
     for i in range(9):
         draw_field(field)
 
-        while True:
-            player1 = check_input_data(list(map(str, input(f"\n[+] {player1_name}'s move >> ").upper().split(" "))))
-
-            if player1 and (player1[0], player1[1]) not in used_slots:
-                break
-
-            print("[-] The coordinates are entered incorrectly!")
-
-        field[player1[0]][player1[1]] = "x"
-
-        used_slots.append((player1[0], player1[1]))
-
-        filed_result = check_field(field)
-
-        if filed_result[0]:
-            print(f"[+] Win {player1_name}!")
-            return True
-
-        while True:
-            player2 = check_input_data(list(map(str, input(f"[+] {player2_name}'s move >> ").upper().split(" "))))
-
-            if player2 and (player2[0], player2[1]) not in used_slots:
-                break
-
-            print("[-] The coordinates are entered incorrectly!")
-
-        field[player2[0]][player2[1]] = "O"
-
-        used_slots.append((player2[0], player2[1]))
-
-        filed_result = check_field(field)
-
-        if filed_result[0]:
-            print(f"\n[+] Win {player2_name}!")
-            return False
-
         if i == 9:
             print("\n[+] Draw!")
+
+        player = players['player2'] if i % 2 else players['player1']
+
+        while True:
+            player_step = check_input_data(
+                list(map(str, input(f"\n[+] {player[0]}'s move >> ").upper().split(" "))))
+
+            if player_step and (player_step[0], player_step[1]) not in used_slots:
+                break
+
+            print("[-] The coordinates are entered incorrectly!")
+
+        field[player_step[0]][player_step[1]] = player[2]
+        used_slots.append((player_step[0], player_step[1]))
+
+        if i > 3:
+            filed_result = check_field(field)
+
+            if filed_result[0]:
+                print(f"[+] Win {player[0]}!")
+                return True
 
 
 if __name__ == '__main__':
@@ -122,15 +109,21 @@ if __name__ == '__main__':
 
     player1_score, player2_score = 0, 0
 
+    players = {
+        "player1": (player1_name, player1_score, "x"),
+        "player2": (player2_name, player2_score, "O")
+    }
+
     while True:
         result = main()
 
-        if result:
+        if isinstance(result, bool):
             player1_score += 1
         else:
             player2_score += 1
 
-        print(f"\n[-] {player1_name}: {player1_score}\n[-] {player2_name}: {player2_score}")
+        print(
+            f"\n[-] {player1_name}: {player1_score}\n[-] {player2_name}: {player2_score}")
 
         if input("\n[+] Continue? (for exit enter the no) >> ").strip().lower() == "no":
             print("\n[-] Thanks for playing! :)")
